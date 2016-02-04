@@ -1,4 +1,3 @@
-# i1uc
 An English version of this text is contained below.
 
 Модуль синхронизации атрибутов продукта с полями ноды типа "ссылка на термин"
