@@ -41,7 +41,7 @@ FUNCTIONS
 + Automatic copying (synchronization) of product attributes to product node fields (taxonomy terms), when saving attributes on product parameters page (like node/123/edit/options).
 + Batch synchronization of attributes for all products.
 
-IT MEANS THAT YOU HAVE:
+IT MEANS THAT YOU HAVE
 + A shop build with drupal7 + ubercart3.
 + You've already created product attributes (admin/store/products/attributes) and corresponding taxonomy vocabularies (admin/structure/taxonomy).
 + Terms in these vocabularies and options in these attributes are already created and have same names.
@@ -54,10 +54,9 @@ HO TO MAKE IT WORK
 Thats it. Now every time, when user edits attributes of a particular product they will be automatically copied to corresponding fields.
 
 BATCH SYNCHRONIZATION
-If you need batch synchronization of attributes for all products of your site, just open this page:
++ If you need batch synchronization of attributes for all products of your site, just open this page:
 http://mysite.net/make_ubercart_product_attributes_happy
-
-You can also limit quantity of processed products via parameters:
++ You can also limit quantity of processed products via parameters:
 http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 
 Enjoy!
