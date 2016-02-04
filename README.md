@@ -33,7 +33,7 @@ http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 
 ****
 
-Module for product attributes to node fields (of "term reference type) synchronization
+Module for product attributes to node fields (of "term reference" type) synchronization
 
 Are you familiar with situation, when it is required to copy all product attributes to taxonomy terms (e.g corresponding node fields)? This module can handle this.
 
@@ -50,6 +50,7 @@ IT MEANS THAT YOU HAVE:
 HO TO MAKE IT WORK
 + Open i1uc.module file and replace variable values with your data: lines 13-27.
 + Enable module in drupal admin section.
+Thats it. Now every time, when user edits attributes of a particular product they will be automatically copied to corresponding fields.
 
 BATCH SYNCHRONIZATION
 If you need batch synchronization of attributes for all products of your site, just open this page:
