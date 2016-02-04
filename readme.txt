@@ -32,7 +32,8 @@ http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 
 ****
 
-Module for product attributes to node fields (of "term reference type) synchronization
+Module for product attributes to node fields (of "term reference" type) synchronization
+
 Are you familiar with situation, when it is required to copy all product attributes to taxonomy terms (e.g corresponding node fields)? This module can handle this.
 
 FUNCTIONS
