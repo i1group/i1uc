@@ -1,0 +1,199 @@
+<?php
+/**
+ * Содержит константы модуля и возвращает запрашиваемую.
+ * @param str $name      - имя нужной константы.
+ * @param mixed $default - возвращаемое значение, если константа не задана (по-умолчанию: нет).
+ * @return mixed - значение запрошенной константы.
+ */
+function i1uc_const ($name, $default=null) {
+	//////////////////////////////////////////////////////////////////////
+	//// перезадайте переменные ниже //// set variable values below //////
+	//////////////////////////////////////////////////////////////////////
+
+	$const["product_types"] = array("product", "shoes", "hats", "dress");  //типы материалов, которые являются продуктами  //product node types
+	//соответствие атрибутов полям ноды  //product attributes ids and corresponding field names
+	$const["aid2field"] = array(
+		2 => "field_tax_color", //цвет  //color
+		6 => "field_tax_size_hats", //размер головных уборов  //hats size
+		7 => "field_tax_size_shoes", //размер обуви  //shoes size
+		8 => "field_tax_size", //размер одежды  //dress size
+	);
+	//соответствие атрибутов словарям таксономии //product attributes ids and corresponding taxonomy vocabularies ids
+	$const["aid2vid"] = array(
+		2 => 11, //цвет  //color
+		6 => 8, //размер головных уборов  //hats size
+		7 => 9, //размер обуви  //shoes size
+		8 => 10, //размер одежды  //dress size
+	);
+
+	//////////////////////////////////////////////////////////////////////
+	//// перезадайте переменные выше //// set variable values above //////
+	//////////////////////////////////////////////////////////////////////
+
+	//также делаем обратное соответствие
+	$const["vid2aid"] = array();
+	foreach ($const["aid2vid"] as $k => $v)
+		$const["vid2aid"][$v] = $k;
+	$const["field2aid"] = array();
+	foreach ($const["aid2field"] as $k => $v)
+		$const["field2aid"][$v] = $k;
+
+	
+	//Если запрашивается простая константа (не внутренности массива) - сразу возвращаем её значение.
+	if (strpos($name, "]") <= 0)
+		return isset($const[$name]) ? $const[$name] : $default;
+	
+	eval("\$res = \$const['".str_replace(array("\"", "'", "]", "["), array("", "", "']", "['"), $name)."'];");
+
+	return $res ? $res : $default;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function i1uc_menu() {
+  $items['make_ubercart_product_attributes_happy'] = array(
+    'title' => 'Сейчас атрибуты станут счастливы',
+    'page callback' => 'i1uc_page',
+    'access arguments' => array('bypass node access'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_form_alter.
+ */
+function i1uc_form_alter (&$form, &$form_state, $form_id) {
+	global $user;
+	//drupal_set_message("form_id=$form_id.");
+	//echo "<pre>form=".print_r($form, 1).".</pre>";
+	
+	switch ($form_id) {
+		case "uc_object_options_form": $form["#submit"][] = "i1uc_product_options_sync_submit";  break;
+	}
+}
+
+/**
+ * Синхронизирует термины таксономии с атрибутами товара.
+ * @param arr $form        - параметр из hook_form_submit().
+ * @param arr &$form_state - параметр из hook_form_submit().
+ * @return void.
+ */
+function i1uc_product_options_sync_submit ($form, &$form_state) {
+	//echo "<pre>form=".print_r($form, 1).".</pre>";
+	//echo "<pre>form_state=".print_r($form_state, 1).".</pre>";
+	//exit();
+	
+	$attr = &$form_state["values"]["attributes"];
+	$opts = &$form["attributes"];
+	$node = &$form_state["build_info"]["args"][0];
+	if (!$attr || !$node->nid || !$node->type)
+		return;
+	
+	//проходимся по всем атрибутам и ищем для них соответствующие термины
+	$res = array();
+	foreach ($attr as $a) {
+		$tree = taxonomy_get_tree(i1uc_const("aid2vid][".$a["aid"]));
+		$opt_list = $opts[$a["aid"]]["options"];
+		foreach($a["options"] as $k => $opt) {
+			if ($opt["select"] == 1) {
+				$tid = i1uc_tree_search_tid($opt_list[$k]["select"]["#title"], $tree);
+				if ($tid > 0)
+					$res[$a["aid"]][] = array("tid" => $tid);
+			}
+		}//foreach
+	}//foreach
+	
+	//копируем все найденные термины в соответствующие поля ноды
+	foreach ($res as $k => $v) {
+		$field = i1uc_const("aid2field][".$k);
+		if ($field) {
+			$f = &$node->$field;
+			$f[LANGUAGE_NONE] = $v;
+		}
+	}
+	
+	if ($res)
+		node_save($node);
+}
+
+/**
+ * Ищет tid термина по его имени в массиве терминов.
+ * @param str $name - имя термина.
+ * @param arr $tree - массив терминов (результат taxonomy_get_tree()).
+ * @return int tid термина или -1, если не найден.
+ */
+function i1uc_tree_search_tid ($name, &$tree) {
+	$res = -1;
+	$k = array_keys($tree);
+	$i = 0;
+	for ($i = 0; $res < 0 && $i < count($k); $i++) {
+		if ($tree[$k[$i]]->name == $name)
+			$res = $tree[$k[$i]]->tid;
+	}
+	
+	return $res;
+}
+
+/**
+ * Синхронизирует термины таксономии с атрибутами товара для всех товаров.
+ * @return void.
+ */
+function i1uc_product_options_sync_all () {
+	set_time_limit(3600);
+	
+	//берём из БД все продукты
+	$start = intval($_GET["start"]);
+	$limit = intval($_GET["limit"]);
+	$types = i1uc_const("product_types");
+	$nodes = db_select('node', 'n')
+  ->fields('n', array("nid"))
+  ->condition('n.type', $types, 'IN');
+  if ($start || $limit)
+		$nodes->range($start, $limit);
+  $nodes = $nodes->execute();
+
+  //проходимся по продуктам и копируем атрибуты в поля ноды
+  while ($node = $nodes->fetchObject()) {
+		$node = node_load($node->nid);
+		if (isset($node->attributes))
+			$attr = &$node->attributes;
+		if (!$attr)
+			continue;
+
+		//проходимся по всем атрибутам и ищем для них соответствующие термины
+		$res = array();
+		foreach ($attr as $a) {
+			$tree = taxonomy_get_tree(i1uc_const("aid2vid][".$a->aid));
+			foreach($a->options as $opt) {
+				$tid = i1uc_tree_search_tid($opt->name, $tree);
+				if ($tid > 0)
+					$res[$a->aid][] = array("tid" => $tid);
+			}//foreach
+		}//foreach
+		
+		//копируем все найденные термины в соответствующие поля ноды
+		foreach ($res as $k => $v) {
+			$field = i1uc_const("aid2field][".$k);
+			if ($field) {
+				$f = &$node->$field;
+				$f[LANGUAGE_NONE] = $v;
+			}
+		}
+		
+		if ($res)
+			node_save($node);
+	}//while
+}
+
+/**
+ * Страница массовой синхронизации атрибутов продуктов.
+ * @return void.
+ */
+function i1uc_page () {
+	i1uc_product_options_sync_all();
+	drupal_set_message("Атрибуты и термины всех продуктов синхронизированы.");
+	drupal_goto();
+}
