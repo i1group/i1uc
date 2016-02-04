@@ -40,7 +40,7 @@ FUNCTIONS
 + Automatic copying (synchronization) of product attributes to product node fields (taxonomy terms), when saving attributes on product parameters page (like node/123/edit/options).
 + Batch synchronization of attributes for all products.
 
-IT MEANS THAT YOU HAVE:
+ITS MEANT THAT YOU HAVE
 + A shop build with drupal7 + ubercart3.
 + You've already created product attributes (admin/store/products/attributes) and corresponding taxonomy vocabularies (admin/structure/taxonomy).
 + Terms in these vocabularies and options in these attributes are already created and have same names.
