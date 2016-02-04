@@ -23,6 +23,7 @@ An English version of this text is contained below.
 МАССОВАЯ СИНХРОНИЗАЦИЯ
 Если нужна массовая синхронизация атрибутов для уже созданных продуктов, просто откройте страницу:
 http://mysite.net/make_ubercart_product_attributes_happy
+
 Здесь также можно ограничивать количество обрабатываемых продуктов через параметры:
 http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 
@@ -33,6 +34,7 @@ http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 ****
 
 Module for product attributes to node fields (of "term reference type) synchronization
+
 Are you familiar with situation, when it is required to copy all product attributes to taxonomy terms (e.g corresponding node fields)? This module can handle this.
 
 FUNCTIONS
@@ -52,6 +54,7 @@ HO TO MAKE IT WORK
 BATCH SYNCHRONIZATION
 If you need batch synchronization of attributes for all products of your site, just open this page:
 http://mysite.net/make_ubercart_product_attributes_happy
+
 You can also limit quantity of processed products via parameters:
 http://mysite.net/make_ubercart_product_attributes_happy?start=1000&limit=300
 
