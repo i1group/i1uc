@@ -49,6 +49,7 @@ ITS MEANT THAT YOU HAVE
 HO TO MAKE IT WORK
 + Open i1uc.module file and replace variable values with your data: lines 13-27.
 + Enable module in drupal admin section.
+Thats it. Now every time, when user edits attributes of a particular product they will be automatically copied to corresponding fields.
 
 BATCH SYNCHRONIZATION
 If you need batch synchronization of attributes for all products of your site, just open this page:
