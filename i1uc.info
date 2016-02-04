@@ -1,0 +1,6 @@
+name = i1uc
+description = Module for ubercart by i1group
+package = Other
+core = 7.x
+
+version = "7.x-1.0"
